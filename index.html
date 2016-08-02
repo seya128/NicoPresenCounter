@@ -1,0 +1,421 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>node.js chat</title>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <link href="style.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript">
+
+  var mode="user";
+  var message_y = 0;
+  var MSG_GOOD = "いいね！！！";
+  var MSG_NOGOOD = "イマイチ！";
+  var MSG_APOINT = "へーーー";
+  var MSG_NOAPOINT = "不採用";
+  var countGood,countNoGood,countApoint,countNoApoint;
+  var startTime = Date.now();
+  var timeout_id = null;
+
+  initCounter();
+
+
+//  var s = io.connect(); //リモート
+//  var s = io.connect('http://localhost:3000'); //ローカル
+  var s = io.connect();
+
+  //サーバから受け取るイベント
+  s.on("connect", function () {});  // 接続時
+  s.on("disconnect", function (client) {});  // 切断時
+  s.on("S_to_C_message", function (data) {
+    addMessage(data.value);
+  });
+
+  //クライアントからイベント送信（イベント名は自由に設定できます）
+  function sendMessage() {
+    var msg = $("#message").val(); //取得
+    $("#message").val(""); //空白にする
+    s.emit("C_to_S_message", {value:msg}); //サーバへ送信
+  }
+  function sendGood() {
+    var msg = MSG_GOOD;
+    s.emit("C_to_S_message", {value:msg}); //サーバへ送信
+  }
+  function sendNoGood() {
+    var msg = MSG_NOGOOD;
+    s.emit("C_to_S_message", {value:msg}); //サーバへ送信
+  }
+  function sendApoint() {
+    var msg = MSG_APOINT;
+    s.emit("C_to_S_message", {value:msg}); //サーバへ送信
+  }
+  function sendNoApoint() {
+    var msg = MSG_NOAPOINT;
+    s.emit("C_to_S_message", {value:msg}); //サーバへ送信
+  }
+
+  function sendBroadcast() {
+    var msg = $("#message").val(); //取得
+    $("#message").val(""); //空白にする
+    s.emit("C_to_S_broadcast", {value:msg}); // サーバへ送信
+  }
+
+  //jqueryでメッセージを追加
+  function addMessage (value,color,size) {
+    //var msg = value.replace( /[!@$%<>'"&|]/g, '' ); //タグ記号とかいくつか削除
+    if (mode == "user") {
+      $("#msg_list").prepend("<div class='msg'>" + escapeHtml(value) + "</div>");
+    }
+    else {
+      message_y += Math.floor(Math.random()*200+40);
+      if (message_y > 400) message_y-=400;
+      if (message_y < 80) message_y+=80;
+      var speed = 12 - Math.random()*6;
+      $("#nico_area").append("<div class='marquee' style='top:"+message_y+"px;'><p style='animation-duration:"+speed+"s;'>" + escapeHtml(value) + "</p></div>");
+      incrementalCounter(value);
+    }
+  }
+
+  //カウンター
+  function initCounter() {
+    countGood = 0;
+    countNoGood = 0;
+    countApoint = 0;
+    countNoApoint = 0;
+    startTime = Date.now();
+    updateCounter();
+  }
+  function updateCounter() {
+    $("#count_good").text(countGood);
+    if (countGood & 1) {
+      $("#count_good").removeClass('count_effect_0'); 
+      $("#count_good").addClass('count_effect_1');
+    } else {
+      $("#count_good").removeClass('count_effect_1'); 
+      $("#count_good").addClass('count_effect_0');
+    }
+
+    $("#count_nogood").text(countNoGood);
+    if (countNoGood & 1) {
+      $("#count_nogood").removeClass('count_effect_0'); 
+      $("#count_nogood").addClass('count_effect_1');
+    } else {
+      $("#count_nogood").removeClass('count_effect_1'); 
+      $("#count_nogood").addClass('count_effect_0');
+    }
+    
+    $("#count_apoint").text(countApoint);
+    if (countApoint & 1) {
+      $("#count_apoint").removeClass('count_effect_0'); 
+      $("#count_apoint").addClass('count_effect_1');
+    } else {
+      $("#count_apoint").removeClass('count_effect_1'); 
+      $("#count_apoint").addClass('count_effect_0');
+    }
+    
+    $("#count_noapoint").text(countNoApoint);
+    if (countNoApoint & 1) {
+      $("#count_noapoint").removeClass('count_effect_0'); 
+      $("#count_noapoint").addClass('count_effect_1');
+    } else {
+      $("#count_noapoint").removeClass('count_effect_1'); 
+      $("#count_noapoint").addClass('count_effect_0');
+    }
+
+  }
+  function incrementalCounter(msg)
+  {
+    if (msg == MSG_GOOD) { countGood++; updateCounter()}
+    else if (msg == MSG_NOGOOD) { countNoGood++; updateCounter()}
+    else if (msg == MSG_APOINT) { countApoint++; updateCounter()}
+    else if (msg == MSG_NOAPOINT) { countNoApoint++; updateCounter()}
+  }
+
+  //シークレットメニュー
+  function clickSecretMenu() {
+    //メニュー表示
+    $("#page_menu").show();
+    $("#secret_menu").hide();
+  }
+
+  //モードチェンジ
+  function changeUserMode() {
+    $("#page_user").show();
+    $("#page_presentation").hide();
+    $(document.body).css( "background", "#EEE" );
+
+    mode="user";
+
+    //メニュー非表示
+    $("#page_menu").hide();
+    $("#secret_menu").show();
+  }
+
+  function changePresentationMode() {
+    $("#page_user").hide();
+    $("#page_presentation").show();
+    $(document.body).css( "background", "#0F0" );
+    mode="presentation";
+
+    if (timeout_id == null) {
+      initCounter();
+      timeout_id = setTimeout(updateTime, 100);
+    }
+
+    //メニュー非表示
+    $("#page_menu").hide();
+    $("#secret_menu").show();
+  }
+
+  function updateTime() {
+    timeout_id = setTimeout(updateTime, 1000);
+
+    var t = Date.now() - startTime;
+    var t_sec = Math.floor((t/1000) % 60);
+    var t_min = Math.floor((t/60000));
+
+    $("#count_time").text(t_min + ":" + ("0" + t_sec).slice(-2));
+    if ((t_min/5) & 1) {
+      $("#count_time").removeClass('count_effect_0'); 
+      $("#count_time").addClass('count_effect_1');
+    } else {
+      $("#count_time").removeClass('count_effect_1'); 
+      $("#count_time").addClass('count_effect_0');
+    }
+  }
+
+
+  function restart(){
+    initCounter();
+    $("#nico_area").empty();
+    $("#msg_list").empty();
+
+    $("#page_menu").hide();
+    $("#secret_menu").show();
+  }
+
+    function cls(){
+    initCounter();
+    $("#nico_area").empty();
+
+    $("#page_menu").hide();
+    $("#secret_menu").show();
+  }
+
+
+  //HTMLエスケープ処理
+  var escapeHtml = (function (String) {
+    var escapeMap = {
+      '&': '&amp;',
+      "'": '&#x27;',
+      '`': '&#x60;',
+      '"': '&quot;',
+      '<': '&lt;',
+      '>': '&gt;'
+    };
+    var escapeReg = '[';
+    var reg;
+    for (var p in escapeMap) {
+      if (escapeMap.hasOwnProperty(p)) {
+        escapeReg += p;
+      }
+    }
+    escapeReg += ']';
+    reg = new RegExp(escapeReg, 'g');
+    return function escapeHtml (str) {
+      str = (str === null || str === undefined) ? '' : '' + str;
+      return str.replace(reg, function (match) {
+        return escapeMap[match];
+      });
+    };
+  }(String));
+
+  </script>
+  <style>
+    *{
+      font-size:30px;
+      margin:0;
+      padding:0;
+    }
+    body {
+      background-color: #EEE;
+    }
+
+    .button {
+      font-family: 'Arial'; 
+      color: #FFFFFF;  
+      background-color: #516CA3; 
+      border-width: 1px; 
+      border-style: solid; 
+      border-color: #3E537D; 
+      border-radius: 18px; 
+      box-shadow: 3px 4px 0px 0px #284470; 
+      text-shadow: 0px 1px 0px #263666; 
+      padding: 0px 40px;
+      margin: 10px;
+      -webkit-appearance: none;
+    }
+    .button:active{ 
+      background-color: #FF4AC9; 
+    }
+
+    .color_good {
+      background-color: #5bb75b;
+    }
+    .color_nogood {
+      background-color: #634B30;
+    }
+
+    .menu {
+      position: fixed;
+      top: 100px;
+      right : 20px;
+      width: 300px;
+      border: solid 2px gray;
+      text-align: center;
+      font-size: 16px;
+    }
+    .menu_button {
+      width: 95%;
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .secret_menu {
+      position: fixed;
+      top: 0px;
+      right : 0px;
+      width: 100px;
+      height: 100px;
+      border: 0px;
+    }
+
+    #page_user {
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #page_user input {
+      font-size: 40px;
+      padding: 40px;
+    }
+    #page_user .message {
+      width: 98%;
+    }
+    #page_user .message_send {
+      float: right;
+    }
+
+    #page_presentation {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+
+    #nico_area {
+      position: fixed;
+      width:100%;
+      top: 0;
+      left: 0;
+    }
+
+    #counter_area td,p {
+      color:#fff;
+      font-size:26px;
+      text-shadow: 2px 2px 0px #000; 
+    }
+
+    .count_effect_0 {
+      animation: count_0 1.5s;
+    }
+    .count_effect_1 {
+      animation: count_1 1.5s;
+    }
+    @keyframes count_0 {
+      from { transform: scale(2);}
+      to { transform: scale(1); }
+    }
+    @keyframes count_1 {
+      from { transform: scale(2);}
+      to { transform: scale(1); }
+    }
+
+    .marquee {
+      position: fixed;
+      overflow:hidden;
+      margin:0;
+      padding: 0;
+      width:100%;
+    }
+
+    .marquee p {
+      text-align:left;
+      display:inline-block;
+      white-space:nowrap;
+      color:#fff;
+      font-size:48px;
+      text-shadow: 4px 4px 0px #000; 
+      animation-name:marquee;
+      animation-duration:10s;
+      animation-timing-function:linear;
+      animation-iteration-count:1;
+      animation-fill-mode: forwards;
+    }
+    @-webkit-keyframes marquee {
+      0%   {margin-left:100%; width:100%;}
+      100%  {margin-left:-100%; width:100%;}
+    }
+
+</style>
+</head>
+<body>
+
+  <!-- PAGE:ユーザー -->
+  <div id="page_user">
+    <div id="msg_list" style="height:300px; overflow:auto;"></div>
+    <form action="" method="post" onsubmit="return false;">
+      <div class="message">
+        <input type="text" class="text" style="width:90%;" id="message"/>
+        <input type="submit" class="button message_send" onclick="sendMessage();" value="送信" />
+      </div>
+      <div style="width:100%; clear:both;">
+        <input type="submit" class="button color_good" style="width:40%;" onclick="sendGood();" value="いいね！" />
+        <input type="submit" class="button color_nogood" style="width:40%;" onclick="sendNoGood();" value="イマイチ！" />
+<!--        <input type="submit" class="button color_good" style="width:40%;" onclick="sendApoint();" value="採用！" />
+        <input type="submit" class="button color_nogood" style="width:40%;" onclick="sendNoApoint();" value="不採用！" />
+-->      </div>
+    </form>
+  </div>
+
+  <!-- PAGE:プレゼンテーションモード -->
+  <div id="page_presentation" style="display: none">
+    <div id="nico_area">
+      <div class="marquee"><p>テキスト</p></div>
+    </div>
+    <div id="counter_area">
+      <table width="100%">
+        <tr>
+          <td width="40%">　　<span id="count_time"></span></td>
+          <td width="30%">　　いいね : <span id="count_good" class="count_effect_0">0</span></td>
+          <td width="30%">イマイチ : <span id="count_nogood" class="count_effect_0">0</span></td>
+<!--          <td width="20%">　　採用 : <span id="count_apoint" class="count_effect_0">0</span></td>
+          <td width="20%">不採用 : <span id="count_noapoint" class="count_effect_0">0</span></td>
+-->        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PAGE:メニュー -->
+  <div id="secret_menu" class="secret_menu" onclick="clickSecretMenu()">
+  </div>
+  <div id="page_menu" class="menu" style="display:none">
+    <form action="" method="post" onsubmit="return false;">
+      <input type="submit" class="button menu_button" onclick="changeUserMode();" value="ユーザーMODE" />
+      <input type="submit" class="button menu_button" onclick="changePresentationMode();" value="プレゼンMODE" />
+      <input type="submit" class="button menu_button" onclick="restart();" value="リスタート" />
+      <input type="submit" class="button menu_button" onclick="cls();" value="画面クリア" />
+    </form>
+  </div>
+</body>
+</html>
