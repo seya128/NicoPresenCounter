@@ -5,7 +5,6 @@
   <title>node.js chat</title>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <link href="style.css" rel="stylesheet" type="text/css">
   <script type="text/javascript">
 
   var mode="user";
@@ -89,37 +88,37 @@
   function updateCounter() {
     $("#count_good").text(countGood);
     if (countGood & 1) {
-      $("#count_good").removeClass('count_effect_0'); 
+      $("#count_good").removeClass('count_effect_0');
       $("#count_good").addClass('count_effect_1');
     } else {
-      $("#count_good").removeClass('count_effect_1'); 
+      $("#count_good").removeClass('count_effect_1');
       $("#count_good").addClass('count_effect_0');
     }
 
     $("#count_nogood").text(countNoGood);
     if (countNoGood & 1) {
-      $("#count_nogood").removeClass('count_effect_0'); 
+      $("#count_nogood").removeClass('count_effect_0');
       $("#count_nogood").addClass('count_effect_1');
     } else {
-      $("#count_nogood").removeClass('count_effect_1'); 
+      $("#count_nogood").removeClass('count_effect_1');
       $("#count_nogood").addClass('count_effect_0');
     }
-    
+
     $("#count_apoint").text(countApoint);
     if (countApoint & 1) {
-      $("#count_apoint").removeClass('count_effect_0'); 
+      $("#count_apoint").removeClass('count_effect_0');
       $("#count_apoint").addClass('count_effect_1');
     } else {
-      $("#count_apoint").removeClass('count_effect_1'); 
+      $("#count_apoint").removeClass('count_effect_1');
       $("#count_apoint").addClass('count_effect_0');
     }
-    
+
     $("#count_noapoint").text(countNoApoint);
     if (countNoApoint & 1) {
-      $("#count_noapoint").removeClass('count_effect_0'); 
+      $("#count_noapoint").removeClass('count_effect_0');
       $("#count_noapoint").addClass('count_effect_1');
     } else {
-      $("#count_noapoint").removeClass('count_effect_1'); 
+      $("#count_noapoint").removeClass('count_effect_1');
       $("#count_noapoint").addClass('count_effect_0');
     }
 
@@ -177,10 +176,10 @@
 
     $("#count_time").text(t_min + ":" + ("0" + t_sec).slice(-2));
     if ((t_min/5) & 1) {
-      $("#count_time").removeClass('count_effect_0'); 
+      $("#count_time").removeClass('count_effect_0');
       $("#count_time").addClass('count_effect_1');
     } else {
-      $("#count_time").removeClass('count_effect_1'); 
+      $("#count_time").removeClass('count_effect_1');
       $("#count_time").addClass('count_effect_0');
     }
   }
@@ -243,21 +242,21 @@
     }
 
     .button {
-      font-family: 'Arial'; 
-      color: #FFFFFF;  
-      background-color: #516CA3; 
-      border-width: 1px; 
-      border-style: solid; 
-      border-color: #3E537D; 
-      border-radius: 18px; 
-      box-shadow: 3px 4px 0px 0px #284470; 
-      text-shadow: 0px 1px 0px #263666; 
+      font-family: 'Arial';
+      color: #FFFFFF;
+      background-color: #516CA3;
+      border-width: 1px;
+      border-style: solid;
+      border-color: #3E537D;
+      border-radius: 18px;
+      box-shadow: 3px 4px 0px 0px #284470;
+      text-shadow: 0px 1px 0px #263666;
       padding: 0px 40px;
       margin: 10px;
       -webkit-appearance: none;
     }
-    .button:active{ 
-      background-color: #FF4AC9; 
+    .button:active{
+      background-color: #FF4AC9;
     }
 
     .color_good {
@@ -323,7 +322,7 @@
     #counter_area td,p {
       color:#fff;
       font-size:26px;
-      text-shadow: 2px 2px 0px #000; 
+      text-shadow: 2px 2px 0px #000;
     }
 
     .count_effect_0 {
@@ -355,7 +354,7 @@
       white-space:nowrap;
       color:#fff;
       font-size:48px;
-      text-shadow: 4px 4px 0px #000; 
+      text-shadow: 4px 4px 0px #000;
       animation-name:marquee;
       animation-duration:10s;
       animation-timing-function:linear;
